@@ -1,0 +1,59 @@
+<!doctype html>
+<!--[if lt IE 7 ]> <html class="ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]>    <html class="ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]>    <html class="ie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>    <html class="ie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="" lang="en"> <!--<![endif]-->
+<head>
+<title>AeroUP | Secure AeroFS Upload Service</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,700' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="/static/lib/bootstrap/css/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="/static/style.less" type="text/less">
+<script src="/static/lib/less.min.js" type="text/javascript"></script>
+<link rel="shortcut icon" href="/static/favicons/favicon.ico">
+<link rel="apple-touch-icon" sizes="57x57" href="/static/favicons/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/static/favicons/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/static/favicons/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/static/favicons/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/static/favicons/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/static/favicons/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/static/favicons/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-touch-icon-180x180.png">
+<meta name="apple-mobile-web-app-title" content="AeroUP">
+<link rel="icon" type="image/png" href="/static/favicons/favicon-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/static/favicons/favicon-160x160.png" sizes="160x160">
+<link rel="icon" type="image/png" href="/static/favicons/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/static/favicons/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/static/favicons/favicon-32x32.png" sizes="32x32">
+<meta name="msapplication-TileColor" content="#2b5797">
+<meta name="msapplication-TileImage" content="/static/favicons/mstile-144x144.png">
+<meta name="msapplication-config" content="/static/favicons/browserconfig.xml">
+<meta name="application-name" content="AeroUP">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="header row">
+                    <div class="col-xs-12">
+                        <a href="{{ url_for('.hello') }}"><img src="/static/img/birddrop.png" width="125" align="left">
+                        <h1>AeroUP</h1></a>
+                        <h3>Secure AeroFS upload service. Send link, receive file.</h3>
+                    </div>
+                </div>
+                <div class="content">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="/static/lib/jquery.min.js" type="text/javascript"></script>
+<script src="/static/lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+{% block scripts %}
+{% endblock %}
+</html>

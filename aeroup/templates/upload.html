@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="show-modern-world row">
+    <div class="col-xs-12">
+        <div id="file-upload-target">
+            <h2>Drag and drop files</h2>
+            <h4>to upload to {{ link.receiver.name }}</h4>
+        </div>
+        <div class="progress hidden">
+            <div id="file-upload-progress" class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;">
+                <span class="sr-only">0% Complete</span>
+            </div>
+        </div>
+        <h3 id="upload-in-progress" class="hidden">Uploading<span class="animellipsis"></span></h3>
+        <h3 id="upload-success" class="hidden"></h3>
+    </div>
+</div>
+<div class="row ancient-world">
+    <div class="col-xs-12">
+        <h4 class="show-modern-world">Or use file selector:</h4>
+        <form enctype="multipart/form-data" id="upload-form" role="form" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div id="upload" class="form-group">
+                <input type="file" class="form-control" name="uploaded-file"/>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary btn-lg pull-right show-ancient-world" value="Upload file to {{ link.receiver.name }}">
+                <input type="submit" class="btn btn-primary btn-lg pull-right show-modern-world" value="Upload file">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        var person = '{{ link.receiver.name }}';
+        var token = '{{ link.token }}';
+        var csrftoken = "{{ csrf_token() }}";
+    </script>
+    <script src="/static/upload.js" type="text/javascript"></script>
+{% endblock %}
