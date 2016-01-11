@@ -22,14 +22,3 @@ env/bin/pip install -r requirements.txt
 ```
 
 Visit localhost:5000 in your browser, and enjoy.
-
-## Credits
-
-Original Authors:
-
-* Drew Fisher
-* Karen Rustad
-
-Contributing Authors:
-
-* Matt Pillar
