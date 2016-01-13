@@ -6,8 +6,6 @@
 
 {% block scripts %}
 <script type="text/javascript">
-  var current_email = '{{ current_user.email }}';
-  var current_name = '{{ current_user.full_name() }}';
   var csrftoken = '{{ csrf_token() }}';
 </script>
 <script src="/static/lib/react.js" type="text/javascript"></script>

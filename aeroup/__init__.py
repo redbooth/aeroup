@@ -15,9 +15,10 @@ from . import views
 csrf = CsrfProtect()
 
 
-def create_app():
+def create_app(debug):
     app = Flask(__name__)
     app.config.from_object('config')
+    app.debug = debug
 
     login_manager.init_app(app)
     login_manager.login_view = '.login'

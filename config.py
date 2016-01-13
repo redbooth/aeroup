@@ -20,11 +20,9 @@ with open(csrf_keyfile, 'rb') as f:
     SECRET_KEY = f.read()
 
 
-# Email: use svmail to send emails for development purposes
-MAIL_SERVER = "sv.aerofs.com"
+MAIL_SERVER = 'sv.aerofs.com'
 MAIL_PORT = 25
 MAIL_USE_TLS = False
 MAIL_USE_SSL = False
-MAIL_DEBUG = False
 MAIL_USERNAME = None
 MAIL_PASSWORD = None

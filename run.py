@@ -8,8 +8,7 @@ import aeroup
 
 
 def run(debug=True):
-    app = aeroup.create_app()
-    app.debug = debug
+    app = aeroup.create_app(debug)
 
     application = aeroup.create_tornado_app(app)
     # Limit incoming per-connection memory buffer to 256kB.  This limit may

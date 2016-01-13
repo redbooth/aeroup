@@ -28,8 +28,7 @@ def load_user(userid):
 @blueprint.route('/', methods=['GET'])
 @flask_auth.login_required
 def hello():
-    return flask.render_template('index.html',
-                                 current_user=flask_auth.current_user)
+    return flask.render_template('index.html')
 
 
 @blueprint.route('/login', methods=['GET', 'POST'])

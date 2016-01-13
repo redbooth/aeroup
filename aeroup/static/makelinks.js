@@ -197,8 +197,6 @@ var Dashboard = React.createClass({
       $($('.alert')[0]).addClass('hidden');
     };
 
-    // TODO: get email invite API call working
-    // TODO: send email on behalf of {current_email, current_name}
     // TODO: create UI for valid_for and max_uploads
     $.ajax({
       url: data.link.uri,
