@@ -42,7 +42,8 @@ def login():
             appconfig['client_id'], appconfig['client_secret'],
             flask.url_for('.oauth_complete', _external=True))
         auth = aerofs.api.APIAuthClient(config, creds)
-        url = auth.get_authorization_url(['user.read', 'files.appdata'])
+        url = auth.get_authorization_url(['user.read', 'files.read',
+                                          'files.write'])
         return flask.redirect(url)
 
     return flask.render_template('login.html')
@@ -174,9 +175,10 @@ blueprint.add_url_rule('/links/<link_id>', view_func=links_view,
 
 class UploadView(flask.views.MethodView):
     def get(self, link_id):
-        # TODO: also nice error handling for used-up or invalid links
-        link = Link.query.filter_by(uuid=link_id,
-                                    deactivated=False).first_or_404()
+        link = Link.query.filter_by(uuid=link_id, deactivated=False).first()
+        if not link:
+            return flask.render_template('failure.html', link=None)
+
         return flask.render_template('upload.html', link=link)
 
     def post(self, link_id):
@@ -199,7 +201,23 @@ class UploadView(flask.views.MethodView):
 
         # TODO: make this fail nicely when clients are offline or what have you
         # 503 Server Error: Service Unavailable
-        file_res = client.create_file('appdata', upload_date.isoformat() + f.filename) # TODO: 'appdata' is '.appdata/CLIENT-ID-XXX-XXXX-XXXXXXXXX'
+        try:
+            folder_res = client.create_folder('root', 'AeroUP')
+        except Exception as e:
+            if e.response.status_code != 409:
+                raise
+
+            folders = client.get_folder_children('root')['folders']
+            for folder in folders:
+                if folder['name'] == 'AeroUP':
+                    folder_res = folder
+                    break
+            else:
+                e.message += '. AeroUP folder not found.'
+                raise
+        file_res = client.create_file(
+            folder_res['id'],
+            '{}-{}'.format(upload_date.isoformat(), f.filename))
         client.upload_file_content(file_res['id'], f.stream)
 
         upload = Upload()

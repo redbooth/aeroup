@@ -3,7 +3,11 @@
 {% block content %}
 <div class="row">
   <div class="col-xs-12">
-    <h2 class="text-center">This link has expired. Please contact {{ link.receiver.full_name() }} for a new link. Thanks! :)</h2>
+    {% if link %}
+        <h2 class="text-center">This link has expired. Please contact {{ link.receiver.full_name() }} for a new link. Thanks! :)</h2>
+    {% else %}
+        <h2 class="text-center">This link has been deactivated. Please request a new link. Thanks! :)</h2>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
