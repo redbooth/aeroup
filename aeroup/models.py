@@ -46,7 +46,6 @@ class Link(db.Model):
     giver_email = db.Column(db.Unicode(length=_EMAIL_MAX_LEN), nullable=True)
     token = db.Column(db.Unicode(length=256), nullable=False)
     # Ideally create_date would be nonnull, but migrations are hard
-    # TODO: flatten migrations into single initial migration
     create_date = db.Column(db.DateTime, nullable=True)
     expiry_date = db.Column(db.DateTime, nullable=True)
     uploads_allowed = db.Column(db.Integer, nullable=True)

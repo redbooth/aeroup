@@ -2,11 +2,11 @@ import os
 import json
 
 import flask.ext.login
-import flask.ext.sqlalchemy
 import flask_mail
+import flask_sqlalchemy
 
 
-db = flask.ext.sqlalchemy.SQLAlchemy()
+db = flask_sqlalchemy.SQLAlchemy()
 login_manager = flask.ext.login.LoginManager()
 mail = flask_mail.Mail()
 

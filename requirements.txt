@@ -6,5 +6,4 @@ Flask-SQLAlchemy
 Flask-WTF
 futures
 requests
-sqlalchemy-migrate
 tornado
