@@ -108,15 +108,11 @@ class LinksAPI(flask.views.MethodView):
             l = Link()
             l.uuid = uuid.uuid4().hex
             l.receiver_id = flask_auth.current_user.id
-            l.giver_email = None
-            # TODO: get a functional token here
-            l.token = "lololololololol not a real token"
-            # TODO: allow user-specified expiry dates?
+
+            # TODO: allow user-specified expiry dates and max uploads?
             l.expiry_date = datetime.datetime.today() + \
-                    datetime.timedelta(days=14)
+                    datetime.timedelta(days=7)
             l.uploads_allowed = 1
-            l.uploads_performed = 0
-            l.deactivated = False
 
             db.session.add(l)
             db.session.commit()
@@ -148,7 +144,8 @@ class LinksAPI(flask.views.MethodView):
                 'Send me a file via AeroUP',
                 body='{}\n\n{}'.format(
                     link.message,
-                    flask.url_for('.upload', token=link.uuid, _external=True)),
+                    flask.url_for('.upload', link_id=link.uuid,
+                                  _external=True)),
                 sender=(link.receiver.full_name(), link.receiver.email),
                 recipients=[link.giver_email])
             mail.send(msg)
@@ -176,20 +173,25 @@ blueprint.add_url_rule('/links/<link_id>', view_func=links_view,
 
 
 class UploadView(flask.views.MethodView):
-    def get(self, token):
+    def get(self, link_id):
         # TODO: also nice error handling for used-up or invalid links
-        link = Link.query.filter_by(uuid=token,
-                                           deactivated=False).first_or_404()
-        return flask.render_template(
-            'upload.html',
-            link={'token': token,
-                  'receiver': {'name': link.receiver.full_name()}})
-
-    def post(self, token):
-        link = Link.query.filter_by(uuid=token,
+        link = Link.query.filter_by(uuid=link_id,
                                     deactivated=False).first_or_404()
-        # TODO: check if link is expired/consumed, if so abort
-        upload_date = datetime.datetime.today()
+        return flask.render_template('upload.html', link=link)
+
+    def post(self, link_id):
+        link = Link.query.filter_by(uuid=link_id,
+                                    deactivated=False).first_or_404()
+
+        upload_date = datetime.datetime.now()
+        if link.expires_at and upload_date >= link.expires_at:
+            link.deactivated = True
+
+            db.session.add(link)
+            db.session.commit()
+
+            return flask.redirect(flask.url_for('.failure', link_id=link_id))
+
         f = flask.request.files['uploaded-file']
 
         config = aerofs.api.InstanceConfiguration(appconfig['hostname'])
@@ -197,29 +199,39 @@ class UploadView(flask.views.MethodView):
 
         # TODO: make this fail nicely when clients are offline or what have you
         # 503 Server Error: Service Unavailable
-        file_res = client.create_file('appdata', f.filename) # 'appdata' is '.appdata/CLIENT-ID-XXX-XXXX-XXXXXXXXX'
+        file_res = client.create_file('appdata', upload_date.isoformat() + f.filename) # TODO: 'appdata' is '.appdata/CLIENT-ID-XXX-XXXX-XXXXXXXXX'
         client.upload_file_content(file_res['id'], f.stream)
 
         upload = Upload()
         upload.link_id = link.id
-        upload.upload_date = upload_date
         upload.filename = f.filename
         upload.size = f.stream.tell()
         upload.oid = file_res['id']
 
+        link.uploads_performed += 1
+        if link.uploads_allowed and \
+                link.uploads_performed >= link.uploads_allowed:
+            link.deactivated = True
+
+        db.session.add(link)
         db.session.add(upload)
         db.session.commit()
 
-        return flask.redirect(flask.url_for('.thankyou', token=token))
+        return flask.redirect(flask.url_for('.success', link_id=link_id))
 
 
 upload_view = UploadView.as_view('upload')
-blueprint.add_url_rule('/l/<token>', view_func=upload_view,
+blueprint.add_url_rule('/l/<link_id>', view_func=upload_view,
                        methods=['GET', 'POST'])
 
 
-@blueprint.route('/l/<token>/success', methods=['GET', 'POST'])
-def thankyou(token):
-    # TODO: pass in file metadata?
-    link = Link.query.filter_by(uuid=token).first_or_404()
-    return flask.render_template('thankyou.html', link=link)
+@blueprint.route('/l/<link_id>/failure', methods=['GET'])
+def failure(link_id):
+    link = Link.query.filter_by(uuid=link_id).first_or_404()
+    return flask.render_template('failure.html', link=link)
+
+
+@blueprint.route('/l/<link_id>/success', methods=['GET'])
+def success(link_id):
+    link = Link.query.filter_by(uuid=link_id).first_or_404()
+    return flask.render_template('success.html', link=link)

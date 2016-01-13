@@ -1,3 +1,5 @@
+import datetime
+
 import flask
 
 from .config import db
@@ -13,10 +15,17 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.Unicode(length=_EMAIL_MAX_LEN), index=True,
                       unique=True, nullable=False)
-    # TODO: make these nonnull on breaking DB change
-    oauth_token = db.Column(db.Unicode(length=256))
-    first_name = db.Column(db.Unicode(length=_USER_STRING_MAX_LEN))
-    last_name = db.Column(db.Unicode(length=_USER_STRING_MAX_LEN))
+    oauth_token = db.Column(db.Unicode(length=256), nullable=False)
+    first_name = db.Column(db.Unicode(length=_USER_STRING_MAX_LEN),
+                           nullable=False)
+    last_name = db.Column(db.Unicode(length=_USER_STRING_MAX_LEN),
+                          nullable=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now,
+                           nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now,
+                           onupdate=datetime.datetime.now, nullable=False)
+
     links = db.relationship('Link', backref='receiver', lazy='dynamic')
 
     def full_name(self):
@@ -26,13 +35,16 @@ class User(db.Model):
     def get_id(self):
         return self.email
 
-    def is_active(self):
+    @staticmethod
+    def is_active():
         return True
 
-    def is_authenticated(self):
+    @staticmethod
+    def is_authenticated():
         return True
 
-    def is_anonymous(self):
+    @staticmethod
+    def is_anonymous():
         return False
 
 
@@ -43,46 +55,43 @@ class Link(db.Model):
     uuid = db.Column(db.String(32), index=True, unique=True, nullable=False)
     receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'),
                             nullable=False)
-    giver_email = db.Column(db.Unicode(length=_EMAIL_MAX_LEN), nullable=True)
-    token = db.Column(db.Unicode(length=256), nullable=False)
-    # Ideally create_date would be nonnull, but migrations are hard
-    create_date = db.Column(db.DateTime, nullable=True)
-    expiry_date = db.Column(db.DateTime, nullable=True)
-    uploads_allowed = db.Column(db.Integer, nullable=True)
-    uploads_performed = db.Column(db.Integer, nullable=True)
-    message = db.Column(db.Unicode(length=4096), nullable=True)
-    deactivated = db.Column(db.Boolean)
+    giver_email = db.Column(db.Unicode(length=_EMAIL_MAX_LEN))
+    uploads_allowed = db.Column(db.Integer)
+    uploads_performed = db.Column(db.Integer, default=0, nullable=False)
+    message = db.Column(db.Unicode(length=4096))
+    deactivated = db.Column(db.Boolean, default=False, nullable=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now,
+                           nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now,
+                           onupdate=datetime.datetime.now, nullable=False)
+    expires_at = db.Column(db.DateTime)
+
     uploads = db.relationship('Upload', backref='link', lazy='dynamic')
 
     def to_dict(self):
         return {
             'uri': flask.url_for('.links_api', link_id=self.uuid),
-            'public_uri': flask.url_for('.upload', token=self.uuid),
+            'public_uri': flask.url_for('.upload', link_id=self.uuid),
             'receiver': self.receiver.email,
             'giver': self.giver_email or '',
-            'message': self.message or '',
-            # TODO: make create_date and expiry_date non-null
-            'create_date': self.create_date.isoformat() if self.create_date else '',
-            'expiry_date': self.expiry_date.isoformat() if self.create_date else '',
-            'expires_after_uses': self.uploads_allowed or -1,
-            'uploads': [u.to_dict()
-                        for u in self.uploads.order_by('upload_date')],
+            'created_at': self.created_at.isoformat(),
+            'expires_at': self.expires_at.isoformat() \
+                    if self.expires_at else '',
         }
 
 
 class Upload(db.Model):
-    __tablename__ = 'uploads'
+    __tablename__ = 'upload'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     link_id = db.Column(db.Integer, db.ForeignKey('link.id'), nullable=False)
-    upload_date = db.Column(db.DateTime, nullable=False)
-    filename = db.Column(db.Unicode(length=_USER_STRING_MAX_LEN), nullable=False)
+    filename = db.Column(db.Unicode(length=_USER_STRING_MAX_LEN),
+                         nullable=False)
     size = db.Column(db.Integer, nullable=False)
     oid = db.Column(db.String(length=64), nullable=False)
 
-    def to_dict(self):
-        return {
-            'date': self.upload_date.isoformat(),
-            'filename': self.filename,
-            'size': self.size,
-        }
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now,
+                           nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now,
+                           onupdate=datetime.datetime.now, nullable=False)

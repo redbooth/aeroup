@@ -71,7 +71,7 @@ $(document).ready(function() {
     // now post a new XHR request
     if (tests.formdata) {
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/l/' + token);
+      xhr.open('POST', '/l/' + link_id);
       xhr.setRequestHeader("X-CSRFToken", csrftoken);
       xhr.onload = function() {
         $(progress).removeClass('progress-bar-striped active');

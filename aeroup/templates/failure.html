@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xs-12">
+    <h2 class="text-center">This link has expired. Please contact {{ link.receiver.full_name() }} for a new link. Thanks! :)</h2>
+  </div>
+</div>
+{% endblock %}

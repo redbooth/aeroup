@@ -137,7 +137,7 @@ var InviteMaker = React.createClass({
       </div>
     );
   }
-});'
+});
 
 var Dashboard = React.createClass({
   getInitialState: function() {
