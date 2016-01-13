@@ -28,8 +28,6 @@ def load_user(userid):
 @blueprint.route('/', methods=['GET'])
 @flask_auth.login_required
 def hello():
-    # TODO: pass in logged in user info as current_user
-    # so we can use name and email in email template
     return flask.render_template('index.html',
                                  current_user=flask_auth.current_user)
 
@@ -110,7 +108,6 @@ class LinksAPI(flask.views.MethodView):
             l.uuid = uuid.uuid4().hex
             l.receiver_id = flask_auth.current_user.id
 
-            # TODO: allow user-specified expiry dates and max uploads?
             l.expiry_date = datetime.datetime.today() + \
                     datetime.timedelta(days=7)
             l.uploads_allowed = 1
@@ -128,18 +125,10 @@ class LinksAPI(flask.views.MethodView):
         if not flask.request.json:
             flask.abort(400)
 
-        needs_update = False
-        if 'giver' in flask.request.json:
-            link.giver_email = flask.request.json['giver']
-            needs_update = True
-
-        if 'message' in flask.request.json:
-            link.message = flask.request.json['message']
-            needs_update = True
-
-        if needs_update:
-            db.session.add(link)
-            db.session.commit()
+        email = flask.request.json.get('mail')
+        if email:
+            link.giver_email = email['giver']
+            link.message = email.get('message', '')
 
             msg = flask_mail.Message(
                 'Send me a file via AeroUP',
@@ -150,6 +139,18 @@ class LinksAPI(flask.views.MethodView):
                 sender=(link.receiver.full_name(), link.receiver.email),
                 recipients=[link.giver_email])
             mail.send(msg)
+
+        valid_for = flask.request.json.get('valid_for')
+        if valid_for:
+            link.expiry_date = datetime.datetime.today() + \
+                    datetime.timedelta(days=valid_for)
+
+        max_uploads = flask.request.json.get('max_uploads')
+        if max_uploads:
+            link.uploads_allowed = max_uploads
+
+        db.session.add(link)
+        db.session.commit()
 
         return flask.Response(json.dumps(link.to_dict()), status=200,
                               mimetype='application/json')
@@ -177,7 +178,8 @@ class UploadView(flask.views.MethodView):
     def get(self, link_id):
         link = Link.query.filter_by(uuid=link_id, deactivated=False).first()
         if not link:
-            return flask.render_template('failure.html', link=None)
+            return flask.render_template('failure.html', link=None,
+                                         error=False)
 
         return flask.render_template('upload.html', link=link)
 
@@ -199,13 +201,12 @@ class UploadView(flask.views.MethodView):
         config = aerofs.api.InstanceConfiguration(appconfig['hostname'])
         client = aerofs.api.APIClient(config, link.receiver.oauth_token)
 
-        # TODO: make this fail nicely when clients are offline or what have you
-        # 503 Server Error: Service Unavailable
         try:
             folder_res = client.create_folder('root', 'AeroUP')
         except Exception as e:
             if e.response.status_code != 409:
-                raise
+                return flask.render_template('failure.html', link=None,
+                                             error=True)
 
             folders = client.get_folder_children('root')['folders']
             for folder in folders:
@@ -214,7 +215,9 @@ class UploadView(flask.views.MethodView):
                     break
             else:
                 e.message += '. AeroUP folder not found.'
-                raise
+                return flask.render_template('failure.html', link=None,
+                                             error=True)
+
         file_res = client.create_file(
             folder_res['id'],
             '{}-{}'.format(upload_date.isoformat(), f.filename))

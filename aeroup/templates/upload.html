@@ -34,10 +34,10 @@
 {% endblock %}
 
 {% block scripts %}
-  <script type="text/javascript">
-    var person = '{{ link.receiver.full_name() }}';
-    var link_id = '{{ link.uuid }}';
-    var csrftoken = "{{ csrf_token() }}";
-  </script>
-  <script src="/static/upload.js" type="text/javascript"></script>
+<script type="text/javascript">
+  var person = '{{ link.receiver.full_name() }}';
+  var link_id = '{{ link.uuid }}';
+  var csrftoken = "{{ csrf_token() }}";
+</script>
+<script src="/static/upload.js" type="text/javascript"></script>
 {% endblock %}

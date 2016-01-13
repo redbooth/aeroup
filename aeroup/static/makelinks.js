@@ -198,14 +198,20 @@ var Dashboard = React.createClass({
     };
 
     // TODO: get email invite API call working
+    // TODO: send email on behalf of {current_email, current_name}
+    // TODO: create UI for valid_for and max_uploads
     $.ajax({
       url: data.link.uri,
       dataType: 'json',
       contentType: 'application/json; charset=utf-8',
       type: 'POST',
       data: JSON.stringify({
-        giver: data.email,
-        message: data.message
+        // valid_for: 7,
+        // max_uploads: 1,
+        mail: {
+          giver: data.email,
+          message: data.message
+        }
       }),
       success: function() {
         // add giver email address to link
