@@ -1,10 +1,10 @@
+aerofs
 Flask
 Flask-Login
 Flask-Mail
 Flask-SQLAlchemy
 Flask-WTF
+futures
 requests
 sqlalchemy-migrate
-# Note: for development on OSX, tornado must be installed from git, since 4.0.2
-# has a bug on OSX where IOStream futures are handled incorrectly.
 tornado
