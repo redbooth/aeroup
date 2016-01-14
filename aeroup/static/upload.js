@@ -57,11 +57,11 @@ $(document).ready(function() {
   var readfiles = function(files) {
     var formData = tests.formdata ? new FormData() : null;
     for (var i = 0; i < files.length; i++) {
+      var file = files[i];
       if (tests.formdata) {
-        formData.append('uploaded-file', files[i]);
+        formData.append('uploaded-file', file);
       }
 
-      var file = files[i];
       $(holder).hide();
       $('.ancient-world').hide();
       $(progress).parent('.progress').removeClass('hidden');
@@ -94,7 +94,6 @@ $(document).ready(function() {
         xhr.upload.onprogress = function(event) {
           if (event.lengthComputable) {
             var complete = (event.loaded * 100 / event.total | 0);
-            console.log("Sent " + event.loaded + " of " + event.total);
             $(progress).attr('aria-valuenow', complete);
             $(progress).css('width', complete + '%');
           }
@@ -106,11 +105,11 @@ $(document).ready(function() {
   };
 
   if (tests.dnd) {
-    holder.ondragover = function () { this.className = 'hover'; return false; };
+    holder.ondragover = function() { this.className = 'hover'; return false; };
 
-    holder.ondragend = function () { this.className = ''; return false; };
+    holder.ondragend = function() { this.className = ''; return false; };
 
-    holder.ondrop = function (e) {
+    holder.ondrop = function(e) {
       this.className = '';
       e.preventDefault();
       readfiles(e.dataTransfer.files);

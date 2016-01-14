@@ -1,10 +1,7 @@
-import os
-
-from flask import Flask
-from flask_wtf.csrf import CsrfProtect
-from tornado.web import Application
-from tornado.web import FallbackHandler
-from tornado.wsgi import WSGIContainer
+import flask
+import flask_wtf
+import tornado.web
+import tornado.wsgi
 
 from .config import db
 from .config import login_manager
@@ -12,11 +9,11 @@ from .config import mail
 from . import views
 
 
-csrf = CsrfProtect()
+csrf = flask_wtf.csrf.CsrfProtect()
 
 
 def create_app(debug):
-    app = Flask(__name__)
+    app = flask.Flask(__name__)
     app.config.from_object('config')
     app.debug = debug
 
@@ -25,8 +22,6 @@ def create_app(debug):
 
     csrf.init_app(app)
 
-    _moddir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_MIGRATE_REPO'] = os.path.join(_moddir, 'migrations')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
     with app.app_context():
@@ -39,7 +34,9 @@ def create_app(debug):
 
 
 def create_tornado_app(app):
-    application = Application([
-        (r".*", FallbackHandler, dict(fallback=WSGIContainer(app))),
+    application = tornado.web.Application([
+        (r".*",
+         tornado.web.FallbackHandler,
+         dict(fallback=tornado.wsgi.WSGIContainer(app))),
     ], debug=app.debug)
     return application

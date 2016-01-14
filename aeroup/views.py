@@ -74,7 +74,6 @@ def oauth_complete():
 
     db.session.add(user)
     db.session.commit()
-    print 'Added {}'.format(email)
 
     flask_auth.login_user(user)
     return flask.redirect(flask.url_for('.hello'))

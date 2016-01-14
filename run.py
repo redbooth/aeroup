@@ -7,20 +7,20 @@ from tornado.ioloop import IOLoop
 import aeroup
 
 
+HOSTNAME = '127.0.0.1'
+PORT = 5000
+BUFFER_LIMIT = 1024 * 1024 *1024 * 4  # 4GB
+
+
 def run(debug=True):
     app = aeroup.create_app(debug)
 
     application = aeroup.create_tornado_app(app)
-    # Limit incoming per-connection memory buffer to 256kB.  This limit may
-    # need to be adjusted.
-    buffer_limit = 256 * 1024
     http_server = HTTPServer(application, xheaders=True,
-                             max_buffer_size=buffer_limit)
+                             max_buffer_size=BUFFER_LIMIT)
 
-    hostname = '127.0.0.1'
-    port = 5000
-    print 'Listening on {}:{}'.format(hostname, port)
-    http_server.listen(port, address=hostname)
+    print 'Listening on {}:{}'.format(HOSTNAME, PORT)
+    http_server.listen(PORT, address=HOSTNAME)
 
     IOLoop.instance().start()
 
