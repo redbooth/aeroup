@@ -205,8 +205,9 @@ class UploadView(flask.views.MethodView):
             folder_res = client.create_folder('root', 'AeroUP')
         except Exception as e:
             if e.response.status_code != 409:
+                print e
                 return flask.render_template('failure.html', link=None,
-                                             error=True)
+                                             error=e)
 
             folders = client.get_folder_children('root')['folders']
             for folder in folders:
@@ -215,13 +216,18 @@ class UploadView(flask.views.MethodView):
                     break
             else:
                 e.message += '. AeroUP folder not found.'
+                print e
                 return flask.render_template('failure.html', link=None,
-                                             error=True)
+                                             error=e)
 
         file_res = client.create_file(
             folder_res['id'],
             '{}-{}'.format(upload_date.isoformat(), f.filename))
-        client.upload_file_content(file_res['id'], f.stream)
+        try:
+            client.upload_file_content(file_res['id'], f.stream)
+        except Exception as e:
+            print e
+            return flask.render_template('failure.html', link=None, error=e)
 
         upload = Upload()
         upload.link_id = link.id
