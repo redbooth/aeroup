@@ -72,12 +72,22 @@ $(document).ready(function() {
     if (tests.formdata) {
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/l/' + link_id);
-      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.setRequestHeader('X-CSRFToken', csrftoken);
+
       xhr.onload = function() {
         $(progress).removeClass('progress-bar-striped active');
         $('#upload-in-progress').addClass('hidden');
         $('#upload-success').removeClass('hidden');
-        $('#upload-success').append('Sent ' + file.name + ' (' + (file.size ? (file.size/1024|0) + 'K' : '') + ') to ' + person + '. Thanks! :)');
+
+        var display_size = file.size;
+        if (display_size < 1024) {
+          display_size = display_size + 'B';
+        } else if (display_size < 1024 * 1024) {
+          display_size = ~~(display_size / 1024) + 'KB';
+        } else {
+          display_size = ~~(display_size / 1024 / 1024) + 'MB';
+        }
+        $('#upload-success').append('Sent ' + file.name + ' (' + display_size + ') to ' + person + '. Thanks! :)');
       };
 
       if (tests.progress) {
