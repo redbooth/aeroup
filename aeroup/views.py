@@ -220,9 +220,32 @@ class UploadView(flask.views.MethodView):
                 return flask.render_template('failure.html', link=None,
                                              error=e)
 
-        file_res = client.create_file(
-            folder_res['id'],
-            '{}-{}'.format(upload_date.isoformat(), f.filename))
+        try:
+            link_folder_res = client.create_folder(folder_res['id'], link_id)
+        except Exception as e:
+            if e.response.status_code != 409:
+                print e
+                return flask.render_template('failure.html', link=None,
+                                             error=e)
+
+            folders = client.get_folder_children(folder_res['id'])['folders']
+            for folder in folders:
+                if folder['name'] == link_id:
+                    link_folder_res = folder
+                    break
+            else:
+                e.message += '. Link folder not found.'
+                print e
+                return flask.render_template('failure.html', link=None,
+                                             error=e)
+
+        try:
+            file_res = client.create_file(link_folder_res['id'], f.filename)
+        except Exception as e:
+            file_res = client.create_file(
+                link_folder_res['id'],
+                '{}-{}'.format(upload_date.strftime('%s'), f.filename))
+
         try:
             client.upload_file_content(file_res['id'], f.stream)
         except Exception as e:
