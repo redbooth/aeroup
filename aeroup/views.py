@@ -106,9 +106,11 @@ class LinksAPI(flask.views.MethodView):
             l.uuid = uuid.uuid4().hex
             l.receiver_id = flask_auth.current_user.id
 
-            l.expiry_date = datetime.datetime.today() + \
-                    datetime.timedelta(days=7)
-            l.uploads_allowed = 1
+            # TODO: by default, no expiry and unlimited uploads
+            #       in the future, allow users to configure this
+            # l.expiry_date = datetime.datetime.today() + \
+                    # datetime.timedelta(days=7)
+            # l.uploads_allowed = 1
 
             db.session.add(l)
             db.session.commit()
